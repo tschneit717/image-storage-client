@@ -1,4 +1,4 @@
-import { ChangeEvent, useCallback, useState } from "react";
+import { ChangeEvent, FormEventHandler, useCallback, useState } from "react";
 import { postImageUpload } from "../../api/imageUpload";
 
 const ImageUploadForm = () => {
@@ -8,21 +8,26 @@ const ImageUploadForm = () => {
   
   const memoizedHandleChange = useCallback(
     async (e: ChangeEvent<HTMLInputElement>) => {
-      toggleLoading(true)
-      try {
-        console.log(e)
-        // do upload logic
-        await postImageUpload(e.target.files[0])
         setImage(e.target.files[0])
-      } catch (e) {
-        setError(e.message)
-      }
-      toggleLoading(false)
     }, []
   );
+
+  
+  const handleSumbit: FormEventHandler<HTMLFormElement> = async (e) => {
+    e.preventDefault()
+    toggleLoading(true)
+    try {
+      console.log(e)
+      await postImageUpload(image)
+    } catch (e) {
+      setError(e.message)
+    }
+    toggleLoading(false)
+}
   return (
-    <form>
+    <form onSubmit={(e) => handleSumbit(e)}>
       <input type="file" onChange={memoizedHandleChange} accept="image/jpeg, image/png, image/jpg"/>
+      <button type="submit">Submit</button>
       {loading ? "Loading" : <></>}
       {error ? error : <></>}
       {image ? 
